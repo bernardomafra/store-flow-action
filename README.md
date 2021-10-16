@@ -1,2 +1,3 @@
-# smart-auto-shop
-TCC Project to automate a buying process on a website using Python
+# store-flow-action-performer
+
+Microsserviço responsável por simular o fluxo do usuário em diferentes websites através do selenium e notificar o status para a extensão do Google Chrome (**store-flow-tracking**)
