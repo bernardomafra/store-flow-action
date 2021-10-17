@@ -1,4 +1,4 @@
-from selenium import webdriver
+from driver.chrome import Chrome
 
-driver = webdriver.Chrome()
-driver.get("https://www.google.com.br")
+browser = Chrome(headless=False)
+browser.open("https://google.com.br")
