@@ -1,5 +1,6 @@
 import pika
 import logging
+import json
 
 
 class RabbitMQ:
@@ -17,9 +18,12 @@ class RabbitMQ:
         self.channel.queue_declare(queue=self.queue, durable=True)
         self.logger = logging.getLogger("RabbitMQ")
 
-    def send_message(self, message):
-        self.channel.basic_publish(exchange="", routing_key=self.queue, body=message)
-        self.logger.info(f"Message Sent :: {message}")
+    def send_message(self, website, text):
+        body = {"website": website, "step": text}
+        self.channel.basic_publish(
+            exchange="", routing_key=self.queue, body=json.dumps(body)
+        )
+        self.logger.info(f"Message Sent :: {text}")
 
     def close_connection(self):
         self.connection.close()
