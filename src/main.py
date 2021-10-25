@@ -1,13 +1,25 @@
-from driver.chrome import Chrome
-from messaging.rabbitmq import RabbitMQ
+from services.flow import Flow
+from services.rabbitmq_producer import RabbitMQProducer
+from services.rabbitmq_consumer import RabbitMQConsumer
 
-browser = Chrome(headless=True)
-queue = RabbitMQ(host="localhost", port=5672)
+# queue = RabbitMQProducer(host="localhost", port=5672)
+data = RabbitMQConsumer().get()
+
+processes = []
+
+actions = data.get("actions")
 
 
-def open_website(website):
-    browser.open(website)
-    queue.send_message(f"Website openned {website}")
+def run_one(website):
+    flow_performer = Flow(website)
+    flows = actions.get(website).get("flow")
+    for flow_data in flows:
+        flow_performer.perform(flow_data)
 
 
-open_website("https://google.com.br")
+def run():
+    for website, _ in actions.items():
+        run_one(website)
+
+
+run()

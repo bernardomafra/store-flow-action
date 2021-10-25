@@ -1,9 +1,10 @@
 import pika
 import logging
 import json
+import random
 
 
-class RabbitMQ:
+class RabbitMQProducer:
     queue = "hello_world"
     logging.basicConfig(
         level=logging.INFO,
@@ -19,11 +20,12 @@ class RabbitMQ:
         self.logger = logging.getLogger("RabbitMQ")
 
     def send_message(self, website, text):
-        body = {"website": website, "step": text}
+        body = {"website": website, "step": text, "percentage": random.randint(10, 100)}
         self.channel.basic_publish(
             exchange="", routing_key=self.queue, body=json.dumps(body)
         )
         self.logger.info(f"Message Sent :: {text}")
 
     def close_connection(self):
+        self.channel.close()
         self.connection.close()
