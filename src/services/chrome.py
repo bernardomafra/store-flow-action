@@ -80,6 +80,7 @@ class Chrome:
             self.last_key = key
             self.logger.info(f"Element found: {self.element}")
             self.append_action(action)
+
         except NotImplementedError as error:
             self.logger.exception(f"Fatal error in get_element_and_act: {error}")
 
@@ -90,7 +91,6 @@ class Chrome:
         if action_type == "click":
             self.action_chains.click(on_element=self.element)
         elif action_type == "send_keys":
-            print("SENDDDDDD_KEEEEYS")
             self.action_chains.send_keys(action_params.get("value"))
         elif action_type == "keyboard":
             action = Utils.get_function_from(Keys, action_params.get("value"))

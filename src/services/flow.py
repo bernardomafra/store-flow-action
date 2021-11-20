@@ -1,11 +1,13 @@
 import logging
 from services.chrome import Chrome
 from custom_types import FlowData
+from services.rabbitmq_producer import RabbitMQProducer
 
 
 class Flow:
     website = ""
     browser = ""
+    step_queue = ""
 
     def __init__(self, website):
         logging.basicConfig(
@@ -18,6 +20,8 @@ class Flow:
         self.website = website
         self.logger.info(f"Flow initialized for website {website}")
         self.browser = Chrome(headless=False)
+        self.step_queue = RabbitMQProducer(host="localhost", port=5672)
+
 
     def perform(self, flow_data: FlowData):
         successfully_performed = False
@@ -31,6 +35,7 @@ class Flow:
             flow_data.get("action"),
         )
         self.browser.perform_actions()
+        self.notify_step(flow_data.get('step'))
 
     def is_flowdata_valid(self, flow_data: FlowData):
         has_keys = len(flow_data) >= 0
@@ -44,3 +49,7 @@ class Flow:
             return True
 
         return False
+
+    def notify_step(self, step: str):
+        self.step_queue.send_message(self.website, f"Step: {step}")
+        
