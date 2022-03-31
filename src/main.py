@@ -3,7 +3,13 @@ from services.rabbitmq_producer import RabbitMQProducer
 from services.rabbitmq_consumer import RabbitMQConsumer
 
 # queue = RabbitMQProducer(host="localhost", port=5672)
-data = RabbitMQConsumer().get()
+data = {}
+try:
+    queue = RabbitMQConsumer()
+    data = queue.get()
+except Exception as e:
+    print(e)
+    exit(1)
 
 processes = []
 
