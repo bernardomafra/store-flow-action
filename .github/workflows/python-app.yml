@@ -16,27 +16,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.8.10'
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install flake8
-          sudo apt-get update
-          sudo apt-get install gettext
-          sudo apt-get install python3-setuptools
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    strategy:
+      matrix:
+        python-version: ['3.6', '3.7', '3.8', 'pypy3']
 
-      - name: Lint with flake8
+    steps:
+      - uses: 'actions/checkout@v2'
+      - uses: 'actions/setup-python@v2'
+        with:
+          python-version: '${{ matrix.python-version }}'
+      - name: 'Install dependencies'
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          python -VV
+          python -m site
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade coverage[toml] virtualenv tox tox-gh-actions
+
+      - name: 'Run tox targets for ${{ matrix.python-version }}'
+        run: 'python -m tox'
 
   deploy:
     runs-on: ubuntu-latest
