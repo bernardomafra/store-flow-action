@@ -2,7 +2,7 @@ from services.flow import Flow
 from services.rabbitmq_producer import RabbitMQProducer
 from services.rabbitmq_consumer import RabbitMQConsumer
 
-# queue = RabbitMQProducer(host="localhost", port=5672)
+producerQueue = RabbitMQProducer()
 data = {}
 try:
     queue = RabbitMQConsumer()

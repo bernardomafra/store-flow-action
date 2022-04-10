@@ -19,9 +19,9 @@ class Flow:
 
         self.website = website
         self.logger.info(f"Flow initialized for website {website}")
-        self.browser = Chrome(headless=False)
+        self.browser = Chrome(headless=True)
         try:
-            self.step_queue = RabbitMQProducer(host="localhost", port=5672)
+            self.step_queue = RabbitMQProducer()
         except Exception as e:
             self.logger.error('Error at RabbitMQProducer: "{}"'.format(e))
             exit(1)

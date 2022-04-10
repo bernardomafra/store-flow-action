@@ -5,7 +5,7 @@ import random
 
 
 class RabbitMQProducer:
-    queue = "hello_world"
+    queue = "store-flow-steps"
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s | [%(name)s - %(levelname)s] | %(message)s",
@@ -13,8 +13,10 @@ class RabbitMQProducer:
     )
     logging.getLogger("pika").setLevel(logging.WARNING)
 
-    def __init__(self, host, port):
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host, port))
+    def __init__(self):
+        self.connection = pika.BlockingConnection(
+            pika.URLParameters('amqps://ybbzaglt:UqYv8vCBOVDUEZez0q03b_v0VPXFO22Q@moose.rmq.cloudamqp.com/ybbzaglt')
+        )
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue=self.queue, durable=True)
         self.logger = logging.getLogger("RabbitMQ")
