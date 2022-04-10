@@ -61,6 +61,7 @@ class Chrome:
             return False
 
     def open(self, website):
+        self.logger.info('Opening website: {}'.format(website))
         if isinstance(self.driver, webdriver.Chrome):
             print(f"is ({website}) open? {self.is_open(website)}")
             if not self.is_open(website):
