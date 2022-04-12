@@ -1,7 +1,7 @@
-from src.services.runner import Runner
+from services.runner import Runner
 from flask import Flask, Response, request
-from src.database.db import initialize_db
-from src.database.models import Flow
+from database.db import initialize_db
+from database.models import Flow
 import json
 
 app = Flask(__name__)
