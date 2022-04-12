@@ -9,6 +9,7 @@ flask-mongoengine = "*"
 requests = "*"
 selenium = "*"
 pika = "*"
+gunicorn = "*"
 
 [dev-packages]
 
