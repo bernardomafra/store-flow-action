@@ -1,13 +1,13 @@
-from custom_types import Action
+from src.custom_types import Action
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
-from services.actions import Actions
+from src.services.actions import Actions
 from selenium.webdriver.remote.command import Command
 from selenium.webdriver.common.keys import Keys
 
-from utils import Utils
+from src.utils import Utils
 
 from time import sleep
 import logging

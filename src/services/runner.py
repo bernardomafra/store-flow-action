@@ -1,6 +1,6 @@
-from services.flow import Flow
-from services.rabbitmq_producer import RabbitMQProducer
-from services.rabbitmq_consumer import RabbitMQConsumer
+from src.services.flow import Flow
+from src.services.rabbitmq_producer import RabbitMQProducer
+from src.services.rabbitmq_consumer import RabbitMQConsumer
 import json
 
 

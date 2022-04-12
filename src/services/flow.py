@@ -1,7 +1,7 @@
 import logging
-from services.chrome import Chrome
-from custom_types import FlowData
-from services.rabbitmq_producer import RabbitMQProducer
+from src.services.chrome import Chrome
+from src.custom_types import FlowData
+from src.services.rabbitmq_producer import RabbitMQProducer
 
 
 class Flow:
