@@ -31,7 +31,9 @@ class Chrome:
 
         chrome_options = Options()
         chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+        chrome_options.add_argument("--no-sandbox") #bypass OS security model
         chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-dev-shm-usage") #overcome limited resource problems
         chrome_options.add_experimental_option("detach", True)
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--profile-directory=Default")
