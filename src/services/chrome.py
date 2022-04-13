@@ -1,3 +1,4 @@
+import os
 from src.custom_types import Action
 
 from selenium import webdriver
@@ -29,6 +30,7 @@ class Chrome:
         self.logger = logging.getLogger("Chrome")
 
         chrome_options = Options()
+        chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_experimental_option("detach", True)
         chrome_options.add_argument("--disable-extensions")
@@ -45,7 +47,7 @@ class Chrome:
 
         if headless == True:
             chrome_options.add_argument("headless")
-        self.driver = webdriver.Chrome(options=chrome_options)
+        self.driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
         self.logger.info("Selenium initialized")
         self.driver.maximize_window()
 
