@@ -1,1 +1,1 @@
-worker: gunicorn src.main:app
+web: gunicorn src.main:app
