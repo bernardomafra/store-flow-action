@@ -30,17 +30,19 @@ class Chrome:
         self.logger = logging.getLogger("Chrome")
 
         chrome_options = Options()
-        chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+        # chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         chrome_options.add_argument("--no-sandbox") #bypass OS security model
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--disable-dev-shm-usage") #overcome limited resource problems
         chrome_options.add_experimental_option("detach", True)
         chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("disable-infobars")
         chrome_options.add_argument("--profile-directory=Default")
         chrome_options.add_argument("--incognito")
         chrome_options.add_argument("--disable-plugins-discovery")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument('window-size=1920x1480')
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option("useAutomationExtension", False)
         user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"
@@ -49,7 +51,7 @@ class Chrome:
 
         if headless == True:
             chrome_options.add_argument("headless")
-        self.driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
+        self.driver = webdriver.Chrome(options=chrome_options)
         self.logger.info("Selenium initialized")
         self.driver.maximize_window()
 
@@ -92,14 +94,20 @@ class Chrome:
     def append_action(self, action: Action):
         action_type = action.get("type")
         action_params = action.get("params")
-
-        if action_type == "click":
-            self.action_chains.click(on_element=self.element)
-        elif action_type == "send_keys":
-            self.action_chains.send_keys(action_params.get("value"))
-        elif action_type == "keyboard":
-            action = Utils.get_function_from(Keys, action_params.get("value"))
-            self.action_chains.send_keys(action)
+        
+        try:
+            if action_type == "click":
+                self.action_chains.move_to_element(self.element)
+                self.action_chains.click(on_element=self.element)
+            elif action_type == "send_keys":
+                self.action_chains.move_to_element(self.element)
+                self.action_chains.send_keys(action_params.get("value"))
+            elif action_type == "keyboard":
+                action = Utils.get_function_from(Keys, action_params.get("value"))
+                self.action_chains.move_to_element(self.element)
+                self.action_chains.send_keys(action)
+        except Exception as error:
+            self.logger.exception(f"Fatal error in append_action: {error}")
 
     def perform_actions(self):
         self.action_chains.perform()

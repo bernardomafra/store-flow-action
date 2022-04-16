@@ -16,7 +16,7 @@ db = initialize_db(app)
 
 @app.route('/flows', methods=['GET'])
 def get_flows():
-  flows = Flow.objects().exclude('steps').to_json()
+  flows = Flow.objects(enabled=True).exclude('steps').to_json()
   return Response(flows, mimetype="application/json", status=200)
 
 
