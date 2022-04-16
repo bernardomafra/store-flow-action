@@ -20,9 +20,15 @@ class Runner:
 
     def run_one(self, flow_item):
         flow_performer = Flow(flow_item.get('website'))
-        flow_steps = flow_item.get('steps')
-        for step in flow_steps:
-            flow_performer.perform(step)
+        steps = flow_item.get('steps')
+        for step in steps:
+            name = step.get('name')
+            step_flow = step.get('flow')
+            if len(step_flow) > 0:
+                print(f"[Step]:: Start step {name}")
+                for flow in step_flow:
+                    flow_performer.perform(flow)
+                print(f"[Step]:: End step {name}")
 
         flow_performer.finalize()
 
