@@ -70,7 +70,6 @@ class Chrome:
     def open(self, website):
         self.logger.info('Opening website: {}'.format(website))
         if isinstance(self.driver, webdriver.Chrome):
-            print(f"is ({website}) open? {self.is_open(website)}")
             if not self.is_open(website):
                 self.driver.get(website)
         else:
@@ -86,7 +85,7 @@ class Chrome:
 
             self.action_chains = Actions(self.driver)
             self.last_key = key
-            self.logger.info(f"Element found: {self.element}")
+            self.logger.info(f"Element found: {self.element.tag_name}")
             self.append_action(action)
 
         except NotImplementedError as error:
@@ -110,6 +109,11 @@ class Chrome:
         except Exception as error:
             self.driver.save_screenshot(f"screenshots/{action_type}_{randint(0, 100)}.png")
             self.logger.exception(f"Fatal error in append_action: {error}")
+            self.end_connection()
 
     def perform_actions(self):
         self.action_chains.perform()
+
+    def end_connection(self):
+        self.driver.close()
+        self.driver.quit()

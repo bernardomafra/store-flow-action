@@ -24,6 +24,8 @@ class Runner:
         for step in flow_steps:
             flow_performer.perform(step)
 
+        flow_performer.finalize()
+
 
     def run(self):
         for flow_item in json.loads(self.flows):

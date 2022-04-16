@@ -24,6 +24,7 @@ class Flow:
             self.step_queue = RabbitMQProducer()
         except Exception as e:
             self.logger.error('Error at RabbitMQProducer: "{}"'.format(e))
+            self.browser.end_connection()
             exit(1)
 
 
@@ -57,3 +58,6 @@ class Flow:
     def notify_step(self, step: str, percentage: int):
         self.step_queue.send_message(self.website, f"Step: {step}", percentage)
         
+    def finalize(self):
+        self.browser.end_connection()
+        self.step_queue.close_connection()
