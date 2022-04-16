@@ -39,7 +39,7 @@ class Flow:
             flow_data.get("action"),
         )
         self.browser.perform_actions()
-        self.notify_step(flow_data.get('step'))
+        self.notify_step(flow_data.get('step'), flow_data.get('percentage'))
 
     def is_flowdata_valid(self, flow_data: FlowData):
         has_keys = len(flow_data) >= 0
@@ -54,6 +54,6 @@ class Flow:
 
         return False
 
-    def notify_step(self, step: str):
-        self.step_queue.send_message(self.website, f"Step: {step}")
+    def notify_step(self, step: str, percentage: int):
+        self.step_queue.send_message(self.website, f"Step: {step}", percentage)
         

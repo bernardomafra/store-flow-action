@@ -1,4 +1,5 @@
 import os
+from random import randint
 from src.custom_types import Action
 
 from selenium import webdriver
@@ -107,6 +108,7 @@ class Chrome:
                 self.action_chains.move_to_element(self.element)
                 self.action_chains.send_keys(action)
         except Exception as error:
+            self.driver.save_screenshot(f"screenshots/{action_type}_{randint(0, 100)}.png")
             self.logger.exception(f"Fatal error in append_action: {error}")
 
     def perform_actions(self):
