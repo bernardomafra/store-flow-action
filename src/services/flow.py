@@ -56,7 +56,7 @@ class Flow:
         return False
 
     def notify_step(self, step: str, percentage: int):
-        self.step_queue.send_message(self.website, f"Step: {step}", percentage)
+        self.step_queue.send_message(self.website, f"Step: {step}", percentage, self.browser.driver.current_url)
         
     def finalize(self):
         self.browser.end_connection()
