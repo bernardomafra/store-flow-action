@@ -6,12 +6,14 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from src.services.actions import Actions
 from selenium.webdriver.remote.command import Command
 from selenium.webdriver.common.keys import Keys
 
 from src.utils import Utils
+from string import Template
 
 from time import sleep
 import logging
@@ -23,8 +25,10 @@ class Chrome:
     action_chains = ""
     url_list = []
     last_key = ""
+    product = ""
+    errors = []
 
-    def __init__(self, headless):
+    def __init__(self, product):
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s | [%(name)s - %(levelname)s] | %(message)s",
@@ -51,12 +55,12 @@ class Chrome:
         user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"
 
         chrome_options.add_argument(f"user-agent={user_agent}")
+        chrome_options.add_argument("headless")
 
-        if headless == True:
-            chrome_options.add_argument("headless")
         self.driver = webdriver.Chrome(options=chrome_options)
         self.logger.info("Selenium initialized")
         self.driver.maximize_window()
+        self.product = product
 
     def is_open(self, website):
         try:
@@ -77,9 +81,11 @@ class Chrome:
         else:
             self.logger.error("Driver instance not defined or misstyped")
 
-    def get_element_and_add_actions(self, key_type: str, key: str, action: Action):
+    def get_element_and_add_actions(self, key_type: str, key: str, action: Action, step: str):
         try:
             if not self.element or self.last_key != key:
+                if "product" in key:
+                    key = Utils.replace_product_name(sentence=key, product=self.product)
                 self.logger.info(f"Searching for element with {key_type}={key}...")
                 self.element: WebElement = WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located(locator=(key_type.lower(), key))
@@ -88,10 +94,22 @@ class Chrome:
             self.action_chains = Actions(self.driver)
             self.last_key = key
             self.logger.info(f"Element found: {self.element.tag_name}")
-            self.append_action(action)
+            if(self.element): 
+                self.append_action(action)
+            else: 
+                self.errors.append(step)
 
         except NotImplementedError as error:
-            self.logger.exception(f"Fatal error in get_element_and_act: {error}")
+            self.logger.error(f"Fatal error in get_element_and_act: {error}")
+            self.errors.append(step)
+
+        except TimeoutException:
+            self.logger.error(f"Cannot find element with {key_type}={key}")
+            self.errors.append(step)
+
+
+    def has_error_in_step(self, step: str):
+        return step in self.errors
 
     def append_action(self, action: Action):
         action_type = action.get("type")
@@ -102,8 +120,11 @@ class Chrome:
                 self.action_chains.move_to_element(self.element)
                 self.action_chains.click(on_element=self.element)
             elif action_type == "send_keys":
+                send_keys_sentence = action_params.get("value")
+                send_keys_sentence = Utils.replace_product_name(sentence=send_keys_sentence, product=self.product)
+                self.logger.info(f"Sending keys: {send_keys_sentence}")
                 self.action_chains.move_to_element(self.element)
-                self.action_chains.send_keys(action_params.get("value"))
+                self.action_chains.send_keys()
             elif action_type == "keyboard":
                 action = Utils.get_function_from(Keys, action_params.get("value"))
                 self.action_chains.move_to_element(self.element)
@@ -113,7 +134,8 @@ class Chrome:
             self.end_connection()
 
     def perform_actions(self):
-        self.action_chains.perform()
+        if type(self.action_chains) is Actions:
+            self.action_chains.perform()
 
     def end_connection(self):
         self.driver.close()

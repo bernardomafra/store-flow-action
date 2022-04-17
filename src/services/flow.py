@@ -9,7 +9,7 @@ class Flow:
     browser = ""
     step_queue = ""
 
-    def __init__(self, website):
+    def __init__(self, website, product):
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s | [%(name)s - %(levelname)s] | %(message)s",
@@ -19,7 +19,7 @@ class Flow:
 
         self.website = website
         self.logger.info(f"Flow initialized for website {website}")
-        self.browser = Chrome(headless=True)
+        self.browser = Chrome(product)
         try:
             self.step_queue = RabbitMQProducer()
         except Exception as e:
@@ -33,14 +33,20 @@ class Flow:
         if not self.is_flowdata_valid(flow_data) or not self.website:
             return successfully_performed
 
+        flow_data_step = flow_data.get("step")
+
         self.browser.open(self.website)
         self.browser.get_element_and_add_actions(
             flow_data.get("key_type"),
             flow_data.get("key"),
             flow_data.get("action"),
+            flow_data_step
         )
         self.browser.perform_actions()
-        self.notify_step(flow_data.get('step'), flow_data.get('percentage'))
+        if self.browser.has_error_in_step(step=flow_data_step):
+            self.notify_step(flow_data_step, flow_data.get("percentage"), error="error")
+        else:
+            self.notify_step(flow_data_step, flow_data.get('percentage'))
 
     def is_flowdata_valid(self, flow_data: FlowData):
         has_keys = len(flow_data) >= 0
@@ -55,8 +61,11 @@ class Flow:
 
         return False
 
-    def notify_step(self, step: str, percentage: int):
-        self.step_queue.send_message(self.website, f"Step: {step}", percentage, self.browser.driver.current_url)
+    def notify_step(self, step: str, percentage: int, error: str = ""):
+        if (error):
+            self.step_queue.send_message(self.website, f"Error at: {step}", 0, self.browser.driver.current_url)
+        else:
+            self.step_queue.send_message(self.website, f"Step: {step}", percentage, self.browser.driver.current_url)
         
     def finalize(self):
         self.browser.end_connection()

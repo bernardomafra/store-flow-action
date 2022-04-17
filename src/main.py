@@ -26,11 +26,12 @@ def add_income():
   enabled_flows = Flow.objects(enabled=True).to_json()
   
   if body.get('product'):
-    # return Response(enabled_flows, mimetype="application/json", status=200)
-
     try: 
-      Runner(enabled_flows).run()
-      return Response(json.dumps({'success': 'searching...'}), mimetype="application/json", status=200)
+      is_threads_set = Runner(enabled_flows).set_threads(product=body.get('product'))
+      if is_threads_set:
+        return Response(json.dumps({'success': 'searching...'}), mimetype="application/json", status=200)
+      else:
+        return Response(json.dumps({'error': 'error setting threads'}), mimetype="application/json", status=500)
     except Exception as e:
       print(e)
       return Response(e, mimetype="application/json", status=500)

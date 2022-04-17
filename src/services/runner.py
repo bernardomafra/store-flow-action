@@ -1,3 +1,4 @@
+import threading
 from src.services.flow import Flow
 from src.services.rabbitmq_producer import RabbitMQProducer
 from src.services.rabbitmq_consumer import RabbitMQConsumer
@@ -18,8 +19,8 @@ class Runner:
         exit(1)
 
 
-    def run_one(self, flow_item):
-        flow_performer = Flow(flow_item.get('website'))
+    def run_one(self, flow_item, product):
+        flow_performer = Flow(website=flow_item.get('website'), product=product)
         steps = flow_item.get('steps')
         for step in steps:
             name = step.get('name')
@@ -32,8 +33,17 @@ class Runner:
 
         flow_performer.finalize()
 
+    def set_threads(self, product):
+        try:
+            threads = []
+            for flow_item in json.loads(self.flows):
+                thread = threading.Thread(target=self.run_one, args=(flow_item, product,))
+                threads.append(thread)
 
-    def run(self):
-        for flow_item in json.loads(self.flows):
-            self.run_one(flow_item)
+            for thread in threads:
+                thread.start()
+            return True
+        except Exception as e:
+            print(e)
+            return False
 
