@@ -5,6 +5,8 @@ from src.custom_types import Action
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from src.services.actions import Actions
 from selenium.webdriver.remote.command import Command
 from selenium.webdriver.common.keys import Keys
@@ -79,8 +81,8 @@ class Chrome:
         try:
             if not self.element or self.last_key != key:
                 self.logger.info(f"Searching for element with {key_type}={key}...")
-                self.element: WebElement = self.driver.find_element(
-                    by=key_type.lower(), value=key
+                self.element: WebElement = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located(locator=(key_type.lower(), key))
                 )
 
             self.action_chains = Actions(self.driver)
@@ -107,7 +109,6 @@ class Chrome:
                 self.action_chains.move_to_element(self.element)
                 self.action_chains.send_keys(action)
         except Exception as error:
-            self.driver.save_screenshot(f"screenshots/{action_type}_{randint(0, 100)}.png")
             self.logger.exception(f"Fatal error in append_action: {error}")
             self.end_connection()
 
