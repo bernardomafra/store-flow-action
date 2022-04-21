@@ -1,4 +1,5 @@
 import logging
+import time
 from src.services.chrome import Chrome
 from src.custom_types import FlowData
 from src.services.rabbitmq_producer import RabbitMQProducer
@@ -63,9 +64,9 @@ class Flow:
 
     def notify_step(self, step: str, percentage: int, error: str = ""):
         if (error):
-            self.step_queue.send_message(self.website, f"Error at: {step}", 0, self.browser.driver.current_url)
+            self.step_queue.send_message(self.website, f"Error at: {step}", 0, self.browser.get_current_url())
         else:
-            self.step_queue.send_message(self.website, f"Step: {step}", percentage, self.browser.driver.current_url)
+            self.step_queue.send_message(self.website, f"Step: {step}", percentage, self.browser.get_current_url())
         
     def finalize(self):
         self.browser.end_connection()

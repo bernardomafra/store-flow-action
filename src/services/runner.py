@@ -35,13 +35,14 @@ class Runner:
 
     def set_threads(self, product):
         try:
-            threads = []
+            # threads = []
             for flow_item in json.loads(self.flows):
-                thread = threading.Thread(target=self.run_one, args=(flow_item, product,))
-                threads.append(thread)
-
-            for thread in threads:
-                thread.start()
+                # thread = threading.Thread(target=self.run_one, args=(flow_item, product,))
+                # threads.append(thread)
+                
+                self.run_one(flow_item, product)
+            # for thread in threads:
+            #     thread.start()
             return True
         except Exception as e:
             print(e)

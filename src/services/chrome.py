@@ -55,7 +55,7 @@ class Chrome:
         user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"
 
         chrome_options.add_argument(f"user-agent={user_agent}")
-        chrome_options.add_argument("headless")
+        # chrome_options.add_argument("headless")
 
         self.driver = webdriver.Chrome(options=chrome_options)
         self.logger.info("Selenium initialized")
@@ -64,7 +64,7 @@ class Chrome:
 
     def is_open(self, website):
         try:
-            url = self.driver.execute(Command.GET_CURRENT_URL).get("value")
+            url = self.get_current_url()
             website = website.replace("https://", "")
             website = website.replace("http://", "")
             website = website.replace("www.", "")
@@ -74,9 +74,9 @@ class Chrome:
             return False
 
     def open(self, website):
-        self.logger.info('Opening website: {}'.format(website))
         if isinstance(self.driver, webdriver.Chrome):
             if not self.is_open(website):
+                self.logger.info('Opening website: {}'.format(website))
                 self.driver.get(website)
         else:
             self.logger.error("Driver instance not defined or misstyped")
@@ -124,7 +124,7 @@ class Chrome:
                 send_keys_sentence = Utils.replace_product_name(sentence=send_keys_sentence, product=self.product)
                 self.logger.info(f"Sending keys: {send_keys_sentence}")
                 self.action_chains.move_to_element(self.element)
-                self.action_chains.send_keys()
+                self.action_chains.send_keys(send_keys_sentence)
             elif action_type == "keyboard":
                 action = Utils.get_function_from(Keys, action_params.get("value"))
                 self.action_chains.move_to_element(self.element)
@@ -140,3 +140,8 @@ class Chrome:
     def end_connection(self):
         self.driver.close()
         self.driver.quit()
+
+    def get_current_url(self):
+        sleep(1)
+        return self.driver.current_url
+        

@@ -27,6 +27,7 @@ class RabbitMQProducer:
             exchange="", routing_key=self.queue, body=json.dumps(body)
         )
         self.logger.info(f"Message Sent :: {text}")
+        self.logger.info(f"Current URL :: {current_url}")
 
     def close_connection(self):
         self.channel.close()
