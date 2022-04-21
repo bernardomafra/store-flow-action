@@ -9,6 +9,7 @@ class Flow:
     website = ""
     browser = ""
     step_queue = ""
+    threads_with_error = []
 
     def __init__(self, website, product):
         logging.basicConfig(
@@ -29,7 +30,7 @@ class Flow:
             exit(1)
 
 
-    def perform(self, flow_data: FlowData):
+    def perform(self, step_name:str, flow_data: FlowData, thread):
         successfully_performed = False
         if not self.is_flowdata_valid(flow_data) or not self.website:
             return successfully_performed
@@ -45,9 +46,10 @@ class Flow:
         )
         self.browser.perform_actions()
         if self.browser.has_error_in_step(step=flow_data_step):
-            self.notify_step(flow_data_step, flow_data.get("percentage"), error="error")
+            self.threads_with_error.append(thread.name)
+            self.notify_step(step_name, flow_data_step, flow_data.get("percentage"), error="error")
         else:
-            self.notify_step(flow_data_step, flow_data.get('percentage'))
+            self.notify_step(step_name, flow_data_step, flow_data.get('percentage'))
 
     def is_flowdata_valid(self, flow_data: FlowData):
         has_keys = len(flow_data) >= 0
@@ -62,12 +64,15 @@ class Flow:
 
         return False
 
-    def notify_step(self, step: str, percentage: int, error: str = ""):
+    def notify_step(self, step_name:str,  step: str, percentage: int, error: str = ""):
         if (error):
-            self.step_queue.send_message(self.website, f"Error at: {step}", 0, self.browser.get_current_url())
+            self.step_queue.send_message(self.website, f"Error at: {step}", 0, self.browser.get_current_page_title(), self.browser.get_current_url())
         else:
-            self.step_queue.send_message(self.website, f"Step: {step}", percentage, self.browser.get_current_url())
+            self.step_queue.send_message(self.website, f"{step_name}: {step}", percentage, self.browser.get_current_page_title(), self.browser.get_current_url())
         
+    def notify_end_of_step(self, step_name:str, percentage: int):
+        self.notify_step(step_name, "Finalizado", percentage)
+
     def finalize(self):
         self.browser.end_connection()
         self.step_queue.close_connection()

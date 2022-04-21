@@ -21,8 +21,8 @@ class RabbitMQProducer:
         self.channel.queue_declare(queue=self.queue, durable=True)
         self.logger = logging.getLogger("RabbitMQ")
 
-    def send_message(self, website, text, percentage, current_url):
-        body = {"website": website, "step": text, "percentage": percentage, "url": current_url}
+    def send_message(self, website, text, percentage, page_title, current_url):
+        body = {"website": website, "step": text, "percentage": percentage, "title": page_title, "url": current_url}
         self.channel.basic_publish(
             exchange="", routing_key=self.queue, body=json.dumps(body)
         )
