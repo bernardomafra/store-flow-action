@@ -1,4 +1,2 @@
 #!/bin/sh
-export FLASK_APP=./src/main.py
-source $(pipenv --venv)/bin/activate
-flask run -h 0.0.0.0
+gunicorn src.main:app --timeout 120 --workers=3 --threads=3 --worker-connections=1000

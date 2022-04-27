@@ -21,7 +21,7 @@ class Flow:
 
         self.website = website
         self.logger.info(f"Flow initialized for website {website}")
-        self.browser = Chrome(product)
+        self.browser = Chrome(variables={"product": product, "min_price": 7000, "max_price": 8500})
         try:
             self.step_queue = RabbitMQProducer()
         except Exception as e:
@@ -47,6 +47,7 @@ class Flow:
         self.browser.perform_actions()
         if self.browser.has_error_in_step(step=flow_data_step):
             self.threads_with_error.append(thread.name)
+            self.logger.error(f'Thread error {thread.name} in step {step_name}')
             self.notify_step(step_name, flow_data_step, flow_data.get("percentage"), error="error")
         else:
             self.notify_step(step_name, flow_data_step, flow_data.get('percentage'))

@@ -9,8 +9,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from src.services.actions import Actions
-from selenium.webdriver.remote.command import Command
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 
 from src.utils import Utils
 from string import Template
@@ -25,10 +25,10 @@ class Chrome:
     action_chains = ""
     url_list = []
     last_key = ""
-    product = ""
+    variables = {}
     errors = []
 
-    def __init__(self, product):
+    def __init__(self, variables: dict):
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s | [%(name)s - %(levelname)s] | %(message)s",
@@ -60,7 +60,7 @@ class Chrome:
         self.driver = webdriver.Chrome(options=chrome_options)
         self.logger.info("Selenium initialized")
         self.driver.maximize_window()
-        self.product = product
+        self.variables = variables
 
     def is_open(self, website):
         try:
@@ -84,8 +84,6 @@ class Chrome:
     def get_element_and_add_actions(self, key_type: str, key: str, action: Action, step: str):
         try:
             if not self.element or self.last_key != key:
-                if "product" in key:
-                    key = Utils.replace_product_name(sentence=key, product=self.product)
                 self.logger.info(f"Searching for element with {key_type}={key}...")
                 self.element: WebElement = WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located(locator=(key_type.lower(), key))
@@ -114,14 +112,23 @@ class Chrome:
     def append_action(self, action: Action):
         action_type = action.get("type")
         action_params = action.get("params")
+        action_value = action_params.get("value")
         
         try:
             if action_type == "click":
                 self.action_chains.move_to_element(self.element)
                 self.action_chains.click(on_element=self.element)
             elif action_type == "send_keys":
-                send_keys_sentence = action_params.get("value")
-                send_keys_sentence = Utils.replace_product_name(sentence=send_keys_sentence, product=self.product)
+                send_keys_sentence = action_value
+                if "$" in action_value:
+                    variable_key = send_keys_sentence.replace("$", "")
+                    variable_value = self.variables.get(variable_key)
+                    send_keys_sentence = Utils.replace_variable_in_sentence(
+                        sentence=send_keys_sentence, 
+                        variable_key=variable_key, 
+                        variable_value=variable_value
+                    )
+
                 self.logger.info(f"Sending keys: {send_keys_sentence}")
                 self.action_chains.move_to_element(self.element)
                 self.action_chains.send_keys(send_keys_sentence)
@@ -138,6 +145,19 @@ class Chrome:
             self.action_chains.perform()
 
     def end_connection(self):
+        print("TODO: remove code below")
+        list = self.driver.find_element(by=By.CLASS_NAME, value="s-main-slot")
+        item_names = list.find_elements(by=By.XPATH, value="//h2[@class='a-size-mini a-spacing-none a-color-base s-line-clamp-4']")
+        item_prices = list.find_elements(by=By.CLASS_NAME, value="a-price")
+        print('==========================')
+        print(f'names len: {len(item_names)}')
+        print(f'prices len: {len(item_prices)}')
+        for name in item_names:
+            print (f"name: {name.text}")
+
+        for price in item_prices:
+            print (f"price: {price.text}")
+        print('==========================')
         self.driver.close()
         self.driver.quit()
 
