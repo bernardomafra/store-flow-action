@@ -145,19 +145,20 @@ class Chrome:
             self.action_chains.perform()
 
     def end_connection(self):
-        print("TODO: remove code below")
-        list = self.driver.find_element(by=By.CLASS_NAME, value="s-main-slot")
-        item_names = list.find_elements(by=By.XPATH, value="//h2[@class='a-size-mini a-spacing-none a-color-base s-line-clamp-4']")
-        item_prices = list.find_elements(by=By.CLASS_NAME, value="a-price")
-        print('==========================')
-        print(f'names len: {len(item_names)}')
-        print(f'prices len: {len(item_prices)}')
-        for name in item_names:
-            print (f"name: {name.text}")
+        # TODO: remove code below and implement it in correct way
+        
+        # list = self.driver.find_element(by=By.CLASS_NAME, value="s-main-slot")
+        # item_names = list.find_elements(by=By.XPATH, value="//h2[@class='a-size-mini a-spacing-none a-color-base s-line-clamp-4']")
+        # item_prices = list.find_elements(by=By.CLASS_NAME, value="a-price")
+        # print('==========================')
+        # print(f'names len: {len(item_names)}')
+        # print(f'prices len: {len(item_prices)}')
+        # for name in item_names:
+        #     print (f"name: {name.text}")
 
-        for price in item_prices:
-            print (f"price: {price.text}")
-        print('==========================')
+        # for price in item_prices:
+        #     print (f"price: {price.text}")
+        # print('==========================')
         self.driver.close()
         self.driver.quit()
 
