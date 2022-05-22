@@ -27,7 +27,8 @@ def add_income():
   
   if body.get('product'):
     try: 
-      is_threads_set = Runner(enabled_flows).set_threads(product=body.get('product'))
+      data = {"product": body.get('product'), "size": "M", "contact": "tccstoreflow@gmail.com", "country": "Brazil", "first_name": "Bernardo", "last_name":"Mafra", "zip_code": "32545300", "street_and_number": "Rua Mário Machado, 83", "complement": "Casa 3", "city": "Sabará", "state":"MG", "min_price": 7000, "max_price": 8500}
+      is_threads_set = Runner(enabled_flows).set_threads(data)
       if is_threads_set:
         return Response(json.dumps({'success': 'searching...'}), mimetype="application/json", status=200)
       else:

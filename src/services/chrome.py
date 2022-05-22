@@ -1,4 +1,6 @@
 import os
+import re
+import time
 from random import randint
 from src.custom_types import Action
 
@@ -11,6 +13,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from src.services.actions import Actions
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.select import Select
 
 from src.utils import Utils
 from string import Template
@@ -37,6 +41,7 @@ class Chrome:
         self.logger = logging.getLogger("Chrome")
 
         chrome_options = Options()
+
         # chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         chrome_options.add_argument("--no-sandbox") #bypass OS security model
         chrome_options.add_argument("--disable-gpu")
@@ -45,7 +50,6 @@ class Chrome:
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("disable-infobars")
         chrome_options.add_argument("--profile-directory=Default")
-        chrome_options.add_argument("--incognito")
         chrome_options.add_argument("--disable-plugins-discovery")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_argument("--start-maximized")
@@ -55,9 +59,9 @@ class Chrome:
         user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"
 
         chrome_options.add_argument(f"user-agent={user_agent}")
-        chrome_options.add_argument("headless")
+        # chrome_options.add_argument("headless")
 
-        self.driver = webdriver.Chrome(options=chrome_options)
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
         self.logger.info("Selenium initialized")
         self.driver.maximize_window()
         self.variables = variables
@@ -83,6 +87,17 @@ class Chrome:
 
     def get_element_and_add_actions(self, key_type: str, key: str, action: Action, step: str):
         try:
+            if "$" in key:
+                variable_key = re.findall(r"\$\w+", "//button[@aria-label='$size']")[0].replace("$", "")
+                variable_value = self.variables.get(variable_key)
+                print(f"variable_key: {variable_key}")
+                print(f"variable_value: {variable_value}")
+                key = Utils.replace_variable_in_sentence(
+                    sentence=key, 
+                    variable_key=variable_key, 
+                    variable_value=variable_value
+                )
+
             if not self.element or self.last_key != key:
                 self.logger.info(f"Searching for element with {key_type}={key}...")
                 self.element: WebElement = WebDriverWait(self.driver, 10).until(
@@ -104,6 +119,10 @@ class Chrome:
         except TimeoutException:
             self.logger.error(f"Cannot find element with {key_type}={key}")
             self.errors.append(step)
+        
+        except Exception as error:
+            self.logger.error(f"Fatal error in get_element_and_act: {error}")
+            self.errors.append(step)
 
 
     def has_error_in_step(self, step: str):
@@ -113,25 +132,29 @@ class Chrome:
         action_type = action.get("type")
         action_params = action.get("params")
         action_value = action_params.get("value")
-        
+        self.driver.implicitly_wait(10) # seconds
+
         try:
+            if action_value and "$" in action_value:
+                variable_key = action_value.replace("$", "")
+                variable_value = self.variables.get(variable_key)
+                action_value = Utils.replace_variable_in_sentence(
+                    sentence=action_value, 
+                    variable_key=variable_key, 
+                    variable_value=variable_value
+                )
             if action_type == "click":
                 self.action_chains.move_to_element(self.element)
+                # self.driver.execute_script("arguments[0].scrollIntoView(true);", self.element);    
                 self.action_chains.click(on_element=self.element)
+                time.sleep(2) 
+            elif action_type == "select":
+                select_object = Select(self.element)
+                select_object.select_by_value(action_value)
             elif action_type == "send_keys":
-                send_keys_sentence = action_value
-                if "$" in action_value:
-                    variable_key = send_keys_sentence.replace("$", "")
-                    variable_value = self.variables.get(variable_key)
-                    send_keys_sentence = Utils.replace_variable_in_sentence(
-                        sentence=send_keys_sentence, 
-                        variable_key=variable_key, 
-                        variable_value=variable_value
-                    )
-
-                self.logger.info(f"Sending keys: {send_keys_sentence}")
+                self.logger.info(f"Sending keys: {action_value}")
                 self.action_chains.move_to_element(self.element)
-                self.action_chains.send_keys(send_keys_sentence)
+                self.action_chains.send_keys(action_value)
             elif action_type == "keyboard":
                 action = Utils.get_function_from(Keys, action_params.get("value"))
                 self.action_chains.move_to_element(self.element)
@@ -145,20 +168,6 @@ class Chrome:
             self.action_chains.perform()
 
     def end_connection(self):
-        # TODO: remove code below and implement it in correct way
-        
-        # list = self.driver.find_element(by=By.CLASS_NAME, value="s-main-slot")
-        # item_names = list.find_elements(by=By.XPATH, value="//h2[@class='a-size-mini a-spacing-none a-color-base s-line-clamp-4']")
-        # item_prices = list.find_elements(by=By.CLASS_NAME, value="a-price")
-        # print('==========================')
-        # print(f'names len: {len(item_names)}')
-        # print(f'prices len: {len(item_prices)}')
-        # for name in item_names:
-        #     print (f"name: {name.text}")
-
-        # for price in item_prices:
-        #     print (f"price: {price.text}")
-        # print('==========================')
         self.driver.close()
         self.driver.quit()
 

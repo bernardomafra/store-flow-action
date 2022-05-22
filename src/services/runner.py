@@ -20,8 +20,8 @@ class Runner:
         exit(1)
 
 
-    def run_one(self, flow_item, product):
-        flow_performer = Flow(website=flow_item.get('website'), product=product)
+    def run_one(self, flow_item, data):
+        flow_performer = Flow(website=flow_item.get('website'), data=data)
         steps = flow_item.get('steps')
         for step in steps:
             name = step.get('name')
@@ -43,11 +43,12 @@ class Runner:
 
         flow_performer.finalize()
 
-    def set_threads(self, product):
+    def set_threads(self, data: dict):
         try:
+            print(data)
             threads = []
             for flow_item in json.loads(self.flows):
-                thread = threading.Thread(target=self.run_one, args=(flow_item, product,))
+                thread = threading.Thread(target=self.run_one, args=(flow_item, data,))
                 threads.append(thread)
 
             for thread in threads:

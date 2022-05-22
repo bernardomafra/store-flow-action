@@ -10,8 +10,9 @@ class Flow:
     browser = ""
     step_queue = ""
     threads_with_error = []
+    is_website_open = False
 
-    def __init__(self, website, product):
+    def __init__(self, website, data):
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s | [%(name)s - %(levelname)s] | %(message)s",
@@ -21,7 +22,7 @@ class Flow:
 
         self.website = website
         self.logger.info(f"Flow initialized for website {website}")
-        self.browser = Chrome(variables={"product": product, "min_price": 7000, "max_price": 8500})
+        self.browser = Chrome(variables=data)
         try:
             self.step_queue = RabbitMQProducer()
         except Exception as e:
@@ -37,7 +38,9 @@ class Flow:
 
         flow_data_step = flow_data.get("step")
 
-        self.browser.open(self.website)
+        if not self.is_website_open:
+            self.browser.open(self.website)
+            self.is_website_open = True
         self.browser.get_element_and_add_actions(
             flow_data.get("key_type"),
             flow_data.get("key"),
@@ -67,13 +70,18 @@ class Flow:
 
     def notify_step(self, step_name:str,  step: str, percentage: int, error: str = ""):
         if (error):
+            self.browser.driver.save_screenshot(f"{step_name}-{step}-{percentage}.png")
+            self.logger.error(f'Error in step {step_name}: {error}')
             self.step_queue.send_message(self.website, f"Error at: {step}", 0, self.browser.get_current_page_title(), self.browser.get_current_url())
         else:
+            if percentage == 90:
+                self.browser.driver.save_screenshot(f"{step_name}-{percentage}.png")
             self.step_queue.send_message(self.website, f"{step_name}: {step}", percentage, self.browser.get_current_page_title(), self.browser.get_current_url())
         
     def notify_end_of_step(self, step_name:str, percentage: int):
         self.notify_step(step_name, "Finalizado", percentage)
 
     def finalize(self):
+        self.is_website_open = False
         self.browser.end_connection()
         self.step_queue.close_connection()

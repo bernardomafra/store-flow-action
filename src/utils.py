@@ -6,6 +6,7 @@ class Utils:
 
     def replace_variable_in_sentence(sentence: str, variable_key: str, variable_value: str):
         try:
+            print(f"Replace {variable_key} with {variable_value} in {sentence}")
             if variable_key in sentence:
                 template_obj = Template(sentence)
                 to_replace = {}

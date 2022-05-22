@@ -10,6 +10,7 @@ requests = "*"
 selenium = "*"
 pika = "*"
 gunicorn = "*"
+webdriver-manager = "*"
 
 [dev-packages]
 
