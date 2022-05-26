@@ -2,8 +2,8 @@ import threading
 from src.services.flow import Flow
 from src.services.rabbitmq_producer import RabbitMQProducer
 from src.services.rabbitmq_consumer import RabbitMQConsumer
+from src.utils import Utils
 import json
-
 
 class Runner:
     producerQueue = RabbitMQProducer()
@@ -19,9 +19,13 @@ class Runner:
         print(e)
         exit(1)
 
-
     def run_one(self, flow_item, data):
-        flow_performer = Flow(website=flow_item.get('website'), data=data)
+        data_processed: dict = {}; 
+        if flow_item.get('data_processor') != None:
+            print(f"Processing {flow_item.get('data_processor')}")
+            info = flow_item.get('data_processor')
+            data_processed = Utils.txt_file_to_dict(info.get('filename'), info.get('delimiter'), info.get('header'), info.get('key_map'))
+        flow_performer = Flow(website=flow_item.get('website'), data={**data, "processed": data_processed})
         steps = flow_item.get('steps')
         for step in steps:
             name = step.get('name')

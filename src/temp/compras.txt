@@ -1,0 +1,9 @@
+Departamento;Nome;Quantidade
+Higiene;Shampoo;1
+Higiene;Condicionador;1
+Limpeza;Desodorante;1
+Mercearia;Arroz;3
+Mercearia;Feijão;1
+Bebidas;Coca-cola;2
+Bebidas;Fanta;1
+;Café;1

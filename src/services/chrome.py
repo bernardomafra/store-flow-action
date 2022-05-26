@@ -88,8 +88,12 @@ class Chrome:
     def get_element_and_add_actions(self, key_type: str, key: str, action: Action, step: str):
         try:
             if "$" in key:
-                variable_key = re.findall(r"\$\w+", "//button[@aria-label='$size']")[0].replace("$", "")
-                variable_value = self.variables.get(variable_key)
+                variable_key = re.findall(r"\$\w+", key)[0].replace("$", "")
+                variable_value = self.variables.get(variable_key) or 
+                if not variable_value:
+                    self.logger.error(f"Variable {variable_key} not found")
+                    self.errors.append(step)
+                    return
                 print(f"variable_key: {variable_key}")
                 print(f"variable_value: {variable_value}")
                 key = Utils.replace_variable_in_sentence(
