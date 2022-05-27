@@ -4,7 +4,6 @@ from src.services.chrome import Chrome
 from src.custom_types import FlowData
 from src.services.rabbitmq_producer import RabbitMQProducer
 
-
 class Flow:
     website = ""
     browser = ""
@@ -70,12 +69,9 @@ class Flow:
 
     def notify_step(self, step_name:str,  step: str, percentage: int, error: str = ""):
         if (error):
-            self.browser.driver.save_screenshot(f"{step_name}-{step}-{percentage}.png")
             self.logger.error(f'Error in step {step_name}: {error}')
             self.step_queue.send_message(self.website, f"Error at: {step}", 0, self.browser.get_current_page_title(), self.browser.get_current_url())
         else:
-            if percentage == 90:
-                self.browser.driver.save_screenshot(f"{step_name}-{percentage}.png")
             self.step_queue.send_message(self.website, f"{step_name}: {step}", percentage, self.browser.get_current_page_title(), self.browser.get_current_url())
         
     def notify_end_of_step(self, step_name:str, percentage: int):

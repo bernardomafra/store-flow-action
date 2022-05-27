@@ -26,7 +26,9 @@ class Runner:
         for step in steps:
             name = step.get('name')
             step_flow = step.get('flow')
-            if len(step_flow) > 0:
+            print(step.get('skip_condition'))
+            print(flow_performer.browser.skip_conditions)
+            if len(step_flow) > 0 and not step.get('skip_condition') in flow_performer.browser.skip_conditions:
                 print(f"[Step]:: Start step {name}")
                 last_percentage = 0
                 current_thread = threading.current_thread()
@@ -39,8 +41,8 @@ class Runner:
                         break;
                 if not error_in_step:
                     flow_performer.notify_end_of_step(name, last_percentage)
-                print(f"[Step]:: End step {name}")
-
+            print(f"[Step]:: End step {name}")
+        
         flow_performer.finalize()
 
     def set_threads(self, data: dict):

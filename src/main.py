@@ -27,7 +27,8 @@ def add_income():
   
   if body.get('product'):
     try: 
-      data = {"product": body.get('product'), "size": "M", "contact": "tccstoreflow@gmail.com", "country": "Brazil", "first_name": "Bernardo", "last_name":"Mafra", "zip_code": "32545300", "street_and_number": "Rua Mário Machado, 83", "complement": "Casa 3", "city": "Sabará", "state":"MG", "min_price": 7000, "max_price": 8500}
+      # data = {"product": body.get('product'), "size": "M", "contact": "tccstoreflow@gmail.com", "country": "Brazil", "first_name": "Bernardo", "last_name":"Mafra", "zip_code": "32545300", "street_and_number": "Rua Mário Machado, 83", "complement": "Casa 3", "city": "Sabará", "state":"MG", "min_price": 7000, "max_price": 8500}
+      data = {"product": body.get('product'), "email": "tccstoreflow@gmail.com", "password": "tcc1234", "name": "Bernardo Martinez de Oliveira Mafra", "cep": "31260020", "street": "Rua Ministro Ivan Lins", "neighborhood": "Dona Clara", "number": "737", "city": "Belo Horizonte", "address_formatted": "Rua Ministro Ivan Lins 737, Bairro Dona Clara, 31260-020"}
       is_threads_set = Runner(enabled_flows).set_threads(data)
       if is_threads_set:
         return Response(json.dumps({'success': 'searching...'}), mimetype="application/json", status=200)
