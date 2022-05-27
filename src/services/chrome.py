@@ -59,7 +59,7 @@ class Chrome:
         user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"
 
         chrome_options.add_argument(f"user-agent={user_agent}")
-        chrome_options.add_argument("headless")
+        # chrome_options.add_argument("headless")
 
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
         self.logger.info("Selenium initialized")
@@ -121,6 +121,8 @@ class Chrome:
             self.errors.append(step)
 
         except TimeoutException:
+            if step == 'verificando se existe endereço cadastrado':
+                return
             self.logger.error(f"Cannot find element with {key_type}={key}")
             if not action.get('type') == 'conditional':
                 self.errors.append(step)
@@ -166,7 +168,7 @@ class Chrome:
                 self.logger.info(f"Sending keys: {action_value}")
                 self.action_chains.move_to_element(self.element)
                 self.action_chains.click(on_element=self.element)
-                if action_value != self.element.text:
+                if action_value != self.element.text and action_params.get('override') != 'bypass':
                     self.action_chains.send_keys(action_value)
             elif action_type == "keyboard":
                 action = Utils.get_function_from(Keys, action_params.get("value"))

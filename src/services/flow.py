@@ -69,6 +69,7 @@ class Flow:
 
     def notify_step(self, step_name:str,  step: str, percentage: int, error: str = ""):
         if (error):
+            self.browser.driver.save_screenshot(f"{step_name}-{step}-{percentage}.png")
             self.logger.error(f'Error in step {step_name}: {error}')
             self.step_queue.send_message(self.website, f"Error at: {step}", 0, self.browser.get_current_page_title(), self.browser.get_current_url())
         else:
